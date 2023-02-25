@@ -1,9 +1,9 @@
 <template>
   <div class="app">
-    <p v-html="pending ? 'loading...' : store.theWord || ''" />
     <button @click="refreshData">Refresh</button>
-    <div v-if="store.theWord">
+    <div v-if="store.theWord && !store.isUpdating">
       <WordInput v-for="(row, index) in Array(5).fill('')" :key="index" :position="index" />
+      <p v-if="store.isFinished" v-html="store.theWord" />
     </div>
   </div>
 </template>

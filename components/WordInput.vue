@@ -59,6 +59,9 @@ const formSubmit = (event: Event) => {
   const attempt = inputValues.value.map((letter) => ({ value: letter }))
   store.submitAttempt(attempt, position)
   isComplete.value = true
+  if (position === 4) {
+    store.isFinished = true
+  }
 }
 
 watch(isActive, (newValue) => {
@@ -77,22 +80,31 @@ watch(isUpdating, (newValue) => {
 </script>
 
 <style scoped>
+.form {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
 .field-group {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  padding: 2rem 0;
+  justify-content: center;
+  padding: 2rem;
 }
 .letter-input {
   display: block;
-  border: solid;
-  width: 1em;
+  border: none;
+  border-radius: 5px;
+  background: #ddd;
+  color: #222;
+  width: 1.2em;
   font-size: 5rem;
   text-align: center;
   text-transform: uppercase;
   padding: 0;
-  margin: 0;
-  aspect-ratio: 1/1.5;
+  margin: 0 0.1em;
+  aspect-ratio: 1/1.15;
 }
 .isComplete .letter-input {
   color: white;
@@ -102,6 +114,6 @@ watch(isUpdating, (newValue) => {
   background: #ecaa44;
 }
 .isComplete .letter-input.isCorrect {
-  background: green;
+  background: #4caf50;
 }
 </style>

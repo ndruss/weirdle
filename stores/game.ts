@@ -1,22 +1,16 @@
 export const useGameStore = defineStore('game', () => {
-  const defaultAttempts = Array(5).fill({ letters: Array(5).fill({ value: '' }) })
-
-  const attempts = ref<GameStore['attempts']>(defaultAttempts)
+  const attempts = ref<GameStore['attempts']>([])
   const theWord = ref('')
   const currentRow = ref(0)
   const isUpdating = ref(false)
-
-  function resetStore(newWord = '') {
-    attempts.value = defaultAttempts
-    theWord.value = newWord
-    currentRow.value = 0
-  }
+  const isFinished = ref(false)
 
   function setStore(word: string) {
-    attempts.value = defaultAttempts
+    attempts.value = Array(5).fill({ letters: Array(5).fill({ value: '' }) })
     theWord.value = word
     currentRow.value = 0
     isUpdating.value = false
+    isFinished.value = false
   }
 
   function submitAttempt(letters: { value: string }[], row: number) {
@@ -30,11 +24,11 @@ export const useGameStore = defineStore('game', () => {
 
   return {
     isUpdating,
+    isFinished,
     attempts,
     currentRow,
     theWord,
     submitAttempt,
     setStore,
-    resetStore
   }
 })
