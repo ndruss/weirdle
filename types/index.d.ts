@@ -9,4 +9,17 @@ type FixedSizeArray<N extends number, T> = N extends 0 ? never[] : {
   length: N
 } & ReadonlyArray<T>
 
-type GameRow = [string, string, string, string, string]
+interface GameLetter {
+  value: string
+  existsInWord: boolean
+  isCorrect: boolean
+}
+
+interface GameStore {
+  theWord: string
+  currentRowIndex: string
+  isUpdating: boolean
+  attempts: {
+    letters: GameLetter[]
+  }[]
+}

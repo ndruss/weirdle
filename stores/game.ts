@@ -1,12 +1,3 @@
-interface GameStore {
-  theWord: string
-  currentRowIndex: string
-  isUpdating: boolean
-  attempts: {
-    letters: { value: string }[]
-  }[]
-}
-
 export const useGameStore = defineStore('game', () => {
   const defaultAttempts = Array(5).fill({ letters: Array(5).fill({ value: '' }) })
 
@@ -29,9 +20,11 @@ export const useGameStore = defineStore('game', () => {
   }
 
   function submitAttempt(letters: { value: string }[], row: number) {
-    attempts.value = attempts.value.map((attempt, index) => {
-      return index === row ? { letters } : attempt
-    })
+    const { validateRow } = useValidation(theWord.value, letters)
+
+    attempts.value = attempts.value.map((attempt, index) => ({
+      letters: index === row ? validateRow : attempt.letters
+    }))
     currentRow.value++
   }
 
