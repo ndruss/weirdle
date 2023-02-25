@@ -14,31 +14,32 @@ export const useGameStore = defineStore('game', () => {
   const theWord = ref('')
   const attempts = ref<GameStore['attempts']>(defaultAttempts)
 
-  function incrementRow(): void {
-    currentRow.value++
-  }
-
-  function setTheWord(word: string): void {
+  function setTheWord(word: string) {
     theWord.value = word
   }
 
-  function resetStore(newWord = ''): void {
+  function resetStore(newWord = '') {
     theWord.value = newWord
     currentRow.value = 0
     attempts.value = []
   }
 
-  function setStore(word: string): void {
+  function setStore(word: string) {
     setTheWord(word)
   }
 
-  // function setAttempts
+  function setAttempt(letters: { value: string }[], row: number) {
+    attempts.value = attempts.value.map((attempt, index) => {
+      return index === row ? { letters } : attempt
+    })
+    currentRow.value++
+  }
 
   return {
     attempts,
     currentRow,
     theWord,
-    incrementRow,
+    setAttempt,
     setTheWord,
     setStore,
     resetStore

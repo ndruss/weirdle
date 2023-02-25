@@ -1,10 +1,9 @@
 <template>
   <div class="app">
-    <p v-if="store.theWord" v-html="store.theWord" />
-    <p v-else v-html="`loading...`" />
+    <p v-html="pending ? 'loading...' : store.theWord || ''" />
     <button @click="refreshData">Refresh</button>
     <div v-if="store.theWord">
-      <WordInput v-for="(row, index) in Array(5).fill('')" :key="index" :index="index" />
+      <WordInput v-for="(row, index) in Array(5).fill('')" :key="index" :position="index" />
     </div>
   </div>
 </template>
@@ -21,7 +20,11 @@ const { data, refresh, pending } = await useFetch<[string, ...string[]]>('word',
 const refreshData = async () => {
   console.log('refreshing data...')
   refreshNuxtData()
-  store.currentRow = 0
+  refresh().finally(() => {
+    if (data.value) {
+      store.setStore(data.value[0])
+    }
+  })
 }
 
 onMounted(() => {

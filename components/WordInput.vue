@@ -1,15 +1,15 @@
 <template>
-  <form @submit="formSubmit">
-    <div class="word-input" :class="{ isActive, isCorrect }">
+  <form class="form" :class="{ isActive, isCorrect, isComplete }" @submit="formSubmit">
+    <div class="field-group">
       <input
-        v-for="(letter, i) in store.attempts[index].letters"
+        v-for="(letter, i) in store.attempts[position].letters"
         ref="inputElements"
         type="text"
         class="letter-input"
         minlength="1"
         maxlength="1"
-        :readonly="!isActive"
         :value="letter.value"
+        :disabled="position > store.currentRow"
         @input="inputChange($event, i)"
         @keyup.backspace="keyupBackspace"
       />
@@ -20,23 +20,20 @@
 
 <script setup lang="ts">
 import { useGameStore } from '@/stores/game'
-
-interface Props {
-  isActive?: boolean
-  index: number
-}
-const props = withDefaults(defineProps<Props>(), {
-  isActive: false,
-})
-
 const store = useGameStore()
 
-const inputElements = ref<HTMLElement[]>([])
-const isSubmitted = ref<boolean>(false)
-const isCorrect = ref<boolean>(false)
-// const attempt = computed<string>(() => inputValues.value.join(''))
+const { position } = defineProps<{
+  position: number
+}>()
 
-const isActive = computed(() => store.currentRow === props.index)
+const inputElements = ref<HTMLElement[]>([])
+const isSubmitted = ref(false)
+const isCorrect = ref(false)
+const isComplete = ref(false)
+const inputValues = ref<string[]>(Array(5).fill(''))
+
+const attemptString = computed<string>(() => inputValues.value.join(''))
+const isActive = computed(() => store.currentRow === position)
 
 const focusLetter = (index: number): void => {
   if (inputElements.value) {
@@ -46,7 +43,10 @@ const focusLetter = (index: number): void => {
 
 const inputChange = (event: Event, index: number) => {
   const { data } = event as InputEvent
-  focusLetter(index + (data ? 1 : -1))
+  if (data) {
+    inputValues.value[index] = data
+    focusLetter(index + 1)
+  }
 }
 
 const keyupBackspace = (event: Event) => {
@@ -55,40 +55,31 @@ const keyupBackspace = (event: Event) => {
 }
 
 const validateInput = (attempt: string | Ref<string>): void => {
-  const value = unref(attempt).toLowerCase()
+  const value = unref(attemptString).toLowerCase()
   isCorrect.value = !!store.theWord && value === store.theWord.toLowerCase()
 }
 
 const formSubmit = (event: Event) => {
   event.preventDefault()
+  const attempt = inputValues.value.map((letter) => ({ value: letter }))
+  store.setAttempt(attempt, position)
   isSubmitted.value = true
-  // validateInput(attempt)
-  store.incrementRow()
 }
 
-// onBeforeUpdate(() => {
-//   console.log('beforeupdate')
-//   if (isSubmitted.value) {
-//     validateInput(attempt)
-//   }
-//   if (!store.theWord) {
-//     console.log('resetting')
-//     isCorrect.value = false
-//     isSubmitted.value = false
-//     inputValues.value = inputValues.value.fill('')
-//   }
-// })
+watch(isActive, (newValue) => {
+  if (newValue) {
+    console.log({ newValue, position })
+    focusLetter(0)
+  }
+})
 </script>
 
 <style scoped>
-.word-input {
+.field-group {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   padding: 2rem 0;
-}
-.word-input.isActive {
-  /* background-color: aquamarine; */
 }
 .letter-input {
   display: block;
@@ -100,7 +91,6 @@ const formSubmit = (event: Event) => {
   margin: 0;
   aspect-ratio: 1/1.5;
 }
-
 .isCorrect .letter-input {
   color: green;
 }
