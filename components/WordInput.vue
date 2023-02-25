@@ -1,5 +1,5 @@
 <template>
-  <form class="form" :class="{ isActive, isCorrect, isComplete }" @submit="formSubmit">
+  <form ref="formElement" class="form" :class="{ isActive, isCorrect, isComplete }" @submit="formSubmit">
     <div class="field-group">
       <input
         v-for="(letter, i) in store.attempts[position].letters"
@@ -26,6 +26,7 @@ const { position } = defineProps<{
   position: number
 }>()
 
+const formElement = ref<HTMLFormElement>()
 const inputElements = ref<HTMLElement[]>([])
 const isSubmitted = ref(false)
 const isCorrect = ref(false)
@@ -34,6 +35,7 @@ const inputValues = ref<string[]>(Array(5).fill(''))
 
 const attemptString = computed<string>(() => inputValues.value.join(''))
 const isActive = computed(() => store.currentRow === position)
+const isUpdating = computed(() => store.isUpdating)
 
 const focusLetter = (index: number): void => {
   if (inputElements.value) {
@@ -62,7 +64,7 @@ const validateInput = (attempt: string | Ref<string>): void => {
 const formSubmit = (event: Event) => {
   event.preventDefault()
   const attempt = inputValues.value.map((letter) => ({ value: letter }))
-  store.setAttempt(attempt, position)
+  store.submitAttempt(attempt, position)
   isSubmitted.value = true
 }
 
@@ -70,6 +72,13 @@ watch(isActive, (newValue) => {
   if (newValue) {
     console.log({ newValue, position })
     focusLetter(0)
+  }
+})
+
+watch(isUpdating, (newValue) => {
+  if (newValue) {
+    inputValues.value = inputValues.value.fill('')
+    formElement.value?.reset()
   }
 })
 </script>

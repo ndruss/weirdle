@@ -17,23 +17,21 @@ const { data, refresh, pending } = await useFetch<[string, ...string[]]>('word',
   query: { length: 5, lang: 'en' },
 })
 
-const refreshData = async () => {
-  console.log('refreshing data...')
-  refreshNuxtData()
-  refresh().finally(() => {
+const fetchWordData = (): void => {
+  refreshNuxtData().finally(() => {
     if (data.value) {
       store.setStore(data.value[0])
     }
   })
 }
 
-onMounted(() => {
-  refresh().finally(() => {
-    if (data.value) {
-      store.setStore(data.value[0])
-    }
-  })
-})
+const refreshData = async () => {
+  console.log('refreshing data...')
+  store.isUpdating = true
+  fetchWordData()
+}
+
+onMounted(fetchWordData)
 </script>
 
 <style scoped>
