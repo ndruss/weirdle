@@ -1,5 +1,5 @@
 <template>
-  <form ref="formElement" class="form" :class="{ isActive, isComplete, canSubmit }" @submit="formSubmit">
+  <form ref="formElement" class="form" :class="{ isActive, isComplete }" @submit="formSubmit">
     <div class="field-group">
       <input
         v-for="({ value, existsInWord, isCorrect }, i) in store.attempts[position].letters"
@@ -11,7 +11,8 @@
         class="letter-input"
         :class="{ existsInWord, isCorrect }"
         :value="value || inputValues[i]"
-        :disabled="position > store.currentRow"
+        :disabled="position !== store.currentRow"
+        :tabindex="isComplete ? -1 : 0"
         @input="inputChange($event, i)"
         @keyup.backspace="keyupBackspace"
       />
@@ -22,7 +23,6 @@
       type="submit"
       value="Submit Word"
       class="submit-button"
-      :class="{ canSubmit }"
     />
   </form>
 </template>
@@ -45,13 +45,15 @@ const isActive = computed(() => store.currentRow === position)
 const isUpdating = computed(() => store.isUpdating)
 
 const focusLetter = (index: number): void => {
+  console.log('focusing')
   if (inputElements.value) {
+    console.log(inputElements.value[index])
     inputElements.value[index]?.focus()
   }
 }
 
 const inputChange = (event: Event, index: number) => {
-  console.log('input change')
+  // console.log('input change')
   const { data } = event as InputEvent
   inputValues.value[index] = data || ''
   focusLetter(index + (data ? 1 : -1))
@@ -75,8 +77,10 @@ const formSubmit = (event: Event) => {
 }
 
 watch(isActive, (newValue) => {
+  console.log('isActive')
   if (newValue) {
-    focusLetter(0)
+    console.log(newValue)
+    console.log(inputElements.value[0])
   }
 })
 

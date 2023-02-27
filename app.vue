@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <div v-if="store.theWord && !store.isUpdating" class="game">
-      <WordInput v-for="(row, index) in Array(5).fill('')" :key="index" :position="index" />
+      <WordInputForm v-for="(row, index) in store.attempts" :key="index" :position="index" />
     </div>
     <div v-if="store.isFinished">
       <p v-html="store.theWord" />
@@ -27,8 +27,7 @@ const fetchWordData = (): void => {
   })
 }
 
-const refreshData = async () => {
-  console.log('refreshing data...')
+const refreshData = () => {
   store.isUpdating = true
   fetchWordData()
 }
