@@ -1,9 +1,11 @@
 <template>
   <div class="app">
-    <button @click="refreshData">Refresh</button>
-    <div v-if="store.theWord && !store.isUpdating">
+    <div v-if="store.theWord && !store.isUpdating" class="game">
       <WordInput v-for="(row, index) in Array(5).fill('')" :key="index" :position="index" />
-      <p v-if="store.isFinished" v-html="store.theWord" />
+    </div>
+    <div v-if="store.isFinished">
+      <p v-html="store.theWord" />
+      <button @click="refreshData">Refresh</button>
     </div>
   </div>
 </template>
@@ -12,7 +14,7 @@
 import { useGameStore } from '@/stores/game'
 const store = useGameStore()
 
-const { data, refresh, pending } = await useFetch<[string, ...string[]]>('word', {
+const { data } = await useFetch<[string, ...string[]]>('word', {
   baseURL: 'https://random-word-api.herokuapp.com',
   query: { length: 5, lang: 'en' },
 })
@@ -36,8 +38,21 @@ onMounted(fetchWordData)
 
 <style scoped>
 .app {
-  max-width: 1080px;
-  width: 80%;
-  margin: 0 auto;
+  font-size: 10px;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+}
+.game {
+  position: relative;
+  max-width: 30em;
+  width: 88%;
+  padding-bottom: 6em;
+  margin: 3em 0;
+}
+@media (min-width: 420px) {
+  .app {
+    font-size: 14px;
+  }
 }
 </style>

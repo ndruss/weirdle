@@ -1,5 +1,5 @@
 <template>
-  <form ref="formElement" class="form" :class="{ isActive, isComplete }" @submit="formSubmit">
+  <form ref="formElement" class="form" :class="{ isActive, isComplete, canSubmit }" @submit="formSubmit">
     <div class="field-group">
       <input
         v-for="({ value, existsInWord, isCorrect }, i) in store.attempts[position].letters"
@@ -7,15 +7,23 @@
         type="text"
         minlength="1"
         maxlength="1"
+        required="true"
         class="letter-input"
         :class="{ existsInWord, isCorrect }"
-        :value="value"
+        :value="value || inputValues[i]"
         :disabled="position > store.currentRow"
         @input="inputChange($event, i)"
         @keyup.backspace="keyupBackspace"
       />
     </div>
-    <input type="submit" value="Submit" :disabled="!isActive" />
+    <input
+      v-if="isActive"
+      :id="`form${position}Submit`"
+      type="submit"
+      value="Submit Word"
+      class="submit-button"
+      :class="{ canSubmit }"
+    />
   </form>
 </template>
 
@@ -31,6 +39,7 @@ const formElement = ref<HTMLFormElement>()
 const inputElements = ref<HTMLElement[]>([])
 const isComplete = ref(false)
 const inputValues = ref<string[]>(Array(5).fill(''))
+const canSubmit = ref(false)
 
 const isActive = computed(() => store.currentRow === position)
 const isUpdating = computed(() => store.isUpdating)
@@ -42,16 +51,17 @@ const focusLetter = (index: number): void => {
 }
 
 const inputChange = (event: Event, index: number) => {
+  console.log('input change')
   const { data } = event as InputEvent
-  if (data) {
-    inputValues.value[index] = data
-    focusLetter(index + 1)
-  }
+  inputValues.value[index] = data || ''
+  focusLetter(index + (data ? 1 : -1))
+  canSubmit.value = inputValues.value.every((input) => input !== '')
 }
 
 const keyupBackspace = (event: Event) => {
   const { target } = event as InputEvent
-  console.log((target as HTMLInputElement)?.value)
+  // console.log((target as HTMLInputElement)?.value)
+  canSubmit.value = inputValues.value.every((input) => input !== '')
 }
 
 const formSubmit = (event: Event) => {
@@ -80,40 +90,51 @@ watch(isUpdating, (newValue) => {
 </script>
 
 <style scoped>
-.form {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-}
 .field-group {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  padding: 2rem;
+  display: grid;
+  grid-template-columns: repeat(5, 20%);
 }
 .letter-input {
   display: block;
   border: none;
-  border-radius: 5px;
-  background: #ddd;
+  border-radius: 4px;
+  background: rgb(204 198 189);
   color: #222;
-  width: 1.2em;
-  font-size: 5rem;
+  font-size: 3em;
+  font-weight: 700;
   text-align: center;
   text-transform: uppercase;
   padding: 0;
-  margin: 0 0.1em;
-  aspect-ratio: 1/1.15;
+  margin: 0.1em;
+  aspect-ratio: 1/1.1;
 }
 .isComplete .letter-input {
-  color: white;
-  background: gray;
+  color: #ccc;
+  background-color: rgb(118 118 118);
 }
 .isComplete .letter-input.existsInWord {
-  background: #ecaa44;
+  color: white;
+  background-color: var(--orange);
 }
 .isComplete .letter-input.isCorrect {
-  background: #4caf50;
+  background-color: var(--green);
+}
+.submit-button {
+  position: absolute;
+  inset: auto 0 0;
+  background: #9e9e9e;
+  border: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1em;
+  font-size: 1.2em;
+  letter-spacing: 1.4px;
+  color: #ddd;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.canSubmit .submit-button {
+  color: white;
+  background: var(--green);
 }
 </style>

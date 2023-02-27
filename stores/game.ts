@@ -4,6 +4,7 @@ export const useGameStore = defineStore('game', () => {
   const currentRow = ref(0)
   const isUpdating = ref(false)
   const isFinished = ref(false)
+  const canSubmit = ref(false)
 
   function setStore(word: string) {
     attempts.value = Array(5).fill({ letters: Array(5).fill({ value: '' }) })
@@ -11,6 +12,7 @@ export const useGameStore = defineStore('game', () => {
     currentRow.value = 0
     isUpdating.value = false
     isFinished.value = false
+    canSubmit.value = false
   }
 
   function submitAttempt(letters: { value: string }[], row: number) {
@@ -25,6 +27,7 @@ export const useGameStore = defineStore('game', () => {
   return {
     isUpdating,
     isFinished,
+    canSubmit,
     attempts,
     currentRow,
     theWord,
