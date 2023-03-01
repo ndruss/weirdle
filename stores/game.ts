@@ -3,35 +3,49 @@ export const useGameStore = defineStore('game', () => {
   const theWord = ref('')
   const currentRow = ref(0)
   const isUpdating = ref(false)
-  const isFinished = ref(false)
-  const canSubmit = ref(false)
+  const results = ref<'lose' | 'win'>()
 
   function setStore(word: string) {
     attempts.value = Array(5).fill({ letters: Array(5).fill({ value: '' }) })
     theWord.value = word
     currentRow.value = 0
     isUpdating.value = false
-    isFinished.value = false
-    canSubmit.value = false
+    results.value = undefined
   }
 
-  function submitAttempt(letters: { value: string }[], row: number) {
-    const { validateRow } = useValidation(theWord.value, letters)
+  async function resetStore() {
+    isUpdating.value = true
+    try {
+      await refreshNuxtData()
+    } finally {
+      isUpdating.value = false
+    }
+  }
+
+  function submitAttempt(letters: string[], row: number) {
+    const { validatedRow } = useValidation(theWord.value, letters)
 
     attempts.value = attempts.value.map((attempt, index) => ({
-      letters: index === row ? validateRow : attempt.letters
+      letters: index === row ? validatedRow : attempt.letters
     }))
-    currentRow.value++
+
+    if (letters.join('').toLowerCase() === theWord.value.toLowerCase()) {
+      results.value = 'win'
+    } else if (currentRow.value < attempts.value.length - 1) {
+      currentRow.value++
+    } else {
+      results.value = 'lose'
+    }
   }
 
   return {
     isUpdating,
-    isFinished,
-    canSubmit,
+    results,
     attempts,
     currentRow,
     theWord,
     submitAttempt,
     setStore,
+    resetStore,
   }
 })

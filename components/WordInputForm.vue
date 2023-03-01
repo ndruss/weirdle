@@ -1,5 +1,5 @@
 <template>
-  <form ref="formElement" class="form" :class="{ isActive, isComplete }" @submit="formSubmit">
+  <form ref="formElement" class="form" :class="{ isActive, isComplete, canSubmit }" @submit="formSubmit">
     <div class="field-group">
       <input
         v-for="({ value, existsInWord, isCorrect }, i) in store.attempts[position].letters"
@@ -41,13 +41,11 @@ const isComplete = ref(false)
 const inputValues = ref<string[]>(Array(5).fill(''))
 const canSubmit = ref(false)
 
-const isActive = computed(() => store.currentRow === position)
+const isActive = computed(() => store.currentRow === position && !store.results)
 const isUpdating = computed(() => store.isUpdating)
 
-const focusLetter = (index: number): void => {
-  console.log('focusing')
-  if (inputElements.value) {
-    console.log(inputElements.value[index])
+const focusLetter = (index?: number): void => {
+  if (inputElements.value && index) {
     inputElements.value[index]?.focus()
   }
 }
@@ -68,21 +66,11 @@ const keyupBackspace = (event: Event) => {
 
 const formSubmit = (event: Event) => {
   event.preventDefault()
-  const attempt = inputValues.value.map((letter) => ({ value: letter }))
-  store.submitAttempt(attempt, position)
+  store.submitAttempt(inputValues.value, position)
   isComplete.value = true
-  if (position === 4) {
-    store.isFinished = true
-  }
 }
 
-watch(isActive, (newValue) => {
-  console.log('isActive')
-  if (newValue) {
-    console.log(newValue)
-    console.log(inputElements.value[0])
-  }
-})
+watch(isActive, (newValue) => focusLetter(newValue ? 0 : undefined))
 
 watch(isUpdating, (newValue) => {
   if (newValue) {

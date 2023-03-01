@@ -1,11 +1,15 @@
 <template>
   <div class="app">
-    <div v-if="store.theWord && !store.isUpdating" class="game">
-      <WordInputForm v-for="(row, index) in store.attempts" :key="index" :position="index" />
-    </div>
-    <div v-if="store.isFinished">
-      <p v-html="store.theWord" />
-      <button @click="refreshData">Refresh</button>
+    <p v-if="pending">Loading...</p>
+    <div v-if="!store.isUpdating" class="game">
+      <div v-if="store.theWord" class="word-attempts">
+        <WordInputForm v-for="(row, index) in store.attempts" :key="index" :position="index" />
+      </div>
+      <div v-if="store.results" class="results">
+        <p>You {{ store.results }}</p>
+        <p v-if="store.results === 'lose'" v-html="store.theWord" />
+        <button @click="fetchWordData()">Play Again</button>
+      </div>
     </div>
   </div>
 </template>
@@ -14,22 +18,19 @@
 import { useGameStore } from '@/stores/game'
 const store = useGameStore()
 
-const { data } = await useFetch<[string, ...string[]]>('word', {
+const { data, pending } = await useFetch<[string]>('word', {
   baseURL: 'https://random-word-api.herokuapp.com',
   query: { length: 5, lang: 'en' },
 })
 
-const fetchWordData = (): void => {
-  refreshNuxtData().finally(() => {
-    if (data.value) {
-      store.setStore(data.value[0])
-    }
-  })
-}
-
-const refreshData = () => {
+const fetchWordData = async () => {
   store.isUpdating = true
-  fetchWordData()
+  try {
+    await refreshNuxtData()
+  } finally {
+    store.setStore(data.value?.[0] || '')
+    store.isUpdating = false
+  }
 }
 
 onMounted(fetchWordData)
@@ -37,21 +38,18 @@ onMounted(fetchWordData)
 
 <style scoped>
 .app {
-  font-size: 10px;
   display: flex;
-  flex-flow: row wrap;
-  justify-content: center;
+  flex-flow: column wrap;
+  align-content: center;
 }
 .game {
   position: relative;
   max-width: 30em;
   width: 88%;
   padding-bottom: 6em;
-  margin: 3em 0;
+  margin-top: 3em;
 }
-@media (min-width: 420px) {
-  .app {
-    font-size: 14px;
-  }
+.results {
+  text-align: center;
 }
 </style>

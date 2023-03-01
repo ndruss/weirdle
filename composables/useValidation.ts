@@ -1,12 +1,14 @@
-export const useValidation = (word: string, letters: { value: string }[]) => {
-
-  const validateRow: GameLetter[] = letters.map(({ value }, index) => ({
+export const useValidation = (word: string, letters: string[]) => {
+  const validatedRow: GameLetter[] = letters.map((value, index) => ({
     value,
     existsInWord: word.split('').includes(value),
     isCorrect: value === word[index]
   }))
 
+  const wordIsCorrect = false
+
   return {
-    validateRow
+    validatedRow,
+    wordIsCorrect
   }
 }
