@@ -19,10 +19,10 @@
     </div>
     <input
       v-if="isActive"
-      :id="`form${position}Submit`"
+      :id="`form_${position}_submit`"
       type="submit"
       value="Submit Word"
-      class="submit-button"
+      class="btn-submit btn-primary"
     />
   </form>
 </template>
@@ -37,12 +37,11 @@ const { position } = defineProps<{
 
 const formElement = ref<HTMLFormElement>()
 const inputElements = ref<HTMLElement[]>([])
-const isComplete = ref(false)
 const inputValues = ref<string[]>(Array(5).fill(''))
+const isComplete = ref(false)
 const canSubmit = ref(false)
 
 const isActive = computed(() => store.currentRow === position && !store.results)
-const isUpdating = computed(() => store.isUpdating)
 
 const focusLetter = (index?: number): void => {
   if (inputElements.value && index) {
@@ -51,7 +50,6 @@ const focusLetter = (index?: number): void => {
 }
 
 const inputChange = (event: Event, index: number) => {
-  // console.log('input change')
   const { data } = event as InputEvent
   inputValues.value[index] = data || ''
   focusLetter(index + (data ? 1 : -1))
@@ -60,7 +58,6 @@ const inputChange = (event: Event, index: number) => {
 
 const keyupBackspace = (event: Event) => {
   const { target } = event as InputEvent
-  // console.log((target as HTMLInputElement)?.value)
   canSubmit.value = inputValues.value.every((input) => input !== '')
 }
 
@@ -72,13 +69,16 @@ const formSubmit = (event: Event) => {
 
 watch(isActive, (newValue) => focusLetter(newValue ? 0 : undefined))
 
-watch(isUpdating, (newValue) => {
-  if (newValue) {
-    formElement.value?.reset()
-    inputValues.value = inputValues.value.fill('')
-    isComplete.value = false
+watch(
+  () => store.isUpdating,
+  (newValue) => {
+    if (newValue) {
+      formElement.value?.reset()
+      inputValues.value = inputValues.value.fill('')
+      isComplete.value = false
+    }
   }
-})
+)
 </script>
 
 <style scoped>
@@ -111,21 +111,12 @@ watch(isUpdating, (newValue) => {
 .isComplete .letter-input.isCorrect {
   background-color: var(--green);
 }
-.submit-button {
+.btn-submit {
   position: absolute;
   inset: auto 0 0;
   background: #9e9e9e;
-  border: 0;
-  font-weight: 700;
-  text-transform: uppercase;
-  padding: 1em;
-  font-size: 1.2em;
-  letter-spacing: 1.4px;
-  color: #ddd;
-  cursor: pointer;
-  border-radius: 3px;
 }
-.canSubmit .submit-button {
+.canSubmit .btn-submit {
   color: white;
   background: var(--green);
 }

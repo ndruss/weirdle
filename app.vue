@@ -2,14 +2,15 @@
   <div class="app">
     <p v-if="pending">Loading...</p>
     <div v-if="!store.isUpdating" class="game">
-      <div v-if="store.theWord" class="word-attempts">
-        <WordInputForm v-for="(row, index) in store.attempts" :key="index" :position="index" />
+      <div class="grid">
+        <WordInputForm v-for="(_row, index) in store.attempts" :key="index" :position="index" />
       </div>
-      <div v-if="store.results" class="results">
-        <p>You {{ store.results }}</p>
-        <p v-if="store.results === 'lose'" v-html="store.theWord" />
-        <button @click="fetchWordData()">Play Again</button>
-      </div>
+      <GameResults
+        v-if="store.results"
+        :results="store.results"
+        :the-word="store.theWord"
+        :play-again="fetchWordData"
+      />
     </div>
   </div>
 </template>
@@ -43,13 +44,12 @@ onMounted(fetchWordData)
   align-content: center;
 }
 .game {
-  position: relative;
   max-width: 30em;
   width: 88%;
-  padding-bottom: 6em;
   margin-top: 3em;
 }
-.results {
-  text-align: center;
+.grid {
+  position: relative;
+  padding-bottom: 6em;
 }
 </style>

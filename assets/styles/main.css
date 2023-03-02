@@ -3,6 +3,7 @@
 :root {
   --green: #4caf50;
   --orange: #d49e1e;
+  --blue: #3e71af;
 }
 
 body {
@@ -12,13 +13,26 @@ body {
   margin: 0;
 }
 
+@media (min-width: 420px) {
+  body {
+    font-size: 14px;
+  }
+}
+
 input,
 button {
   font-family: inherit;
 }
 
-@media (min-width: 420px) {
-  body {
-    font-size: 14px;
-  }
+.btn-primary {
+  background: var(--green);
+  border: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1em;
+  font-size: 1.2em;
+  letter-spacing: 1.4px;
+  color: #ddd;
+  cursor: pointer;
+  border-radius: 3px;
 }

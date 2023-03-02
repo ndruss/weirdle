@@ -5,10 +5,7 @@ export const useValidation = (word: string, letters: string[]) => {
     isCorrect: value === word[index]
   }))
 
-  const wordIsCorrect = false
-
   return {
     validatedRow,
-    wordIsCorrect
   }
 }

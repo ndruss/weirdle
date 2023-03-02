@@ -13,15 +13,6 @@ export const useGameStore = defineStore('game', () => {
     results.value = undefined
   }
 
-  async function resetStore() {
-    isUpdating.value = true
-    try {
-      await refreshNuxtData()
-    } finally {
-      isUpdating.value = false
-    }
-  }
-
   function submitAttempt(letters: string[], row: number) {
     const { validatedRow } = useValidation(theWord.value, letters)
 
@@ -39,13 +30,12 @@ export const useGameStore = defineStore('game', () => {
   }
 
   return {
-    isUpdating,
-    results,
     attempts,
     currentRow,
-    theWord,
-    submitAttempt,
+    isUpdating,
+    results,
     setStore,
-    resetStore,
+    submitAttempt,
+    theWord,
   }
 })
