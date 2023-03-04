@@ -1,10 +1,16 @@
 <template>
   <div class="app">
-    <p v-if="store.theWord" v-html="store.theWord" />
-    <p v-else v-html="`loading...`" />
-    <button @click="refreshData">Refresh</button>
-    <div v-if="store.theWord">
-      <WordInput v-for="(row, index) in Array(5).fill('')" :key="index" :index="index" />
+    <p v-if="pending">Loading...</p>
+    <div v-if="!store.isUpdating" class="game">
+      <div class="grid">
+        <WordInputForm v-for="(_row, index) in store.attempts" :key="index" :position="index" />
+      </div>
+      <GameResults
+        v-if="store.results"
+        :results="store.results"
+        :the-word="store.theWord"
+        :play-again="fetchWordData"
+      />
     </div>
   </div>
 </template>
@@ -13,30 +19,37 @@
 import { useGameStore } from '@/stores/game'
 const store = useGameStore()
 
-const { data, refresh, pending } = await useFetch<[string, ...string[]]>('word', {
+const { data, pending } = await useFetch<[string]>('word', {
   baseURL: 'https://random-word-api.herokuapp.com',
   query: { length: 5, lang: 'en' },
 })
 
-const refreshData = async () => {
-  console.log('refreshing data...')
-  refreshNuxtData()
-  store.currentRow = 0
+const fetchWordData = async () => {
+  store.isUpdating = true
+  try {
+    await refreshNuxtData()
+  } finally {
+    store.setStore(data.value?.[0] || '')
+    store.isUpdating = false
+  }
 }
 
-onMounted(() => {
-  refresh().finally(() => {
-    if (data.value) {
-      store.setStore(data.value[0])
-    }
-  })
-})
+onMounted(fetchWordData)
 </script>
 
 <style scoped>
 .app {
-  max-width: 1080px;
-  width: 80%;
-  margin: 0 auto;
+  display: flex;
+  flex-flow: column wrap;
+  align-content: center;
+}
+.game {
+  max-width: 30em;
+  width: 88%;
+  margin-top: 3em;
+}
+.grid {
+  position: relative;
+  padding-bottom: 6em;
 }
 </style>

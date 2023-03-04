@@ -1,46 +1,41 @@
-interface GameStore {
-  theWord: string
-  currentRowIndex: string
-  attempts: {
-    letters: { value: string }[]
-  }[]
-}
-
 export const useGameStore = defineStore('game', () => {
-
-  const defaultAttempts = Array(5).fill({ letters: Array(5).fill({ value: '' }) })
-
-  const currentRow = ref(0)
+  const attempts = ref<GameStore['attempts']>([])
   const theWord = ref('')
-  const attempts = ref<GameStore['attempts']>(defaultAttempts)
+  const currentRow = ref(0)
+  const isUpdating = ref(false)
+  const results = ref<'lose' | 'win'>()
 
-  function incrementRow(): void {
-    currentRow.value++
-  }
-
-  function setTheWord(word: string): void {
+  function setStore(word: string) {
+    attempts.value = Array(5).fill({ letters: Array(5).fill({ value: '' }) })
     theWord.value = word
-  }
-
-  function resetStore(newWord = ''): void {
-    theWord.value = newWord
     currentRow.value = 0
-    attempts.value = []
+    isUpdating.value = false
+    results.value = undefined
   }
 
-  function setStore(word: string): void {
-    setTheWord(word)
-  }
+  function submitAttempt(letters: string[], row: number) {
+    const { validatedRow } = useValidation(theWord.value, letters)
 
-  // function setAttempts
+    attempts.value = attempts.value.map((attempt, index) => ({
+      letters: index === row ? validatedRow : attempt.letters
+    }))
+
+    if (letters.join('').toLowerCase() === theWord.value.toLowerCase()) {
+      results.value = 'win'
+    } else if (currentRow.value < attempts.value.length - 1) {
+      currentRow.value++
+    } else {
+      results.value = 'lose'
+    }
+  }
 
   return {
     attempts,
     currentRow,
-    theWord,
-    incrementRow,
-    setTheWord,
+    isUpdating,
+    results,
     setStore,
-    resetStore
+    submitAttempt,
+    theWord,
   }
 })
